@@ -2,23 +2,31 @@
 
 echo "🔍 Running pre-commit checks..."
 
-# Format check
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$')
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "⚠️ No TypeScript/JavaScript files to check"
+  exit 0
+fi
+
+# Format check (only staged files)
 echo "📝 Checking formatting..."
-deno fmt --check
+echo "$STAGED_FILES" | xargs deno fmt --check
 if [ $? -ne 0 ]; then
   echo "❌ Formatting check failed. Run 'deno task format' to fix."
   exit 1
 fi
 
-# Lint
+# Lint (only staged files)
 echo "🔎 Running linter..."
-deno lint
+echo "$STAGED_FILES" | xargs deno lint
 if [ $? -ne 0 ]; then
   echo "❌ Linting failed. Fix the issues before committing."
   exit 1
 fi
 
-# Tests
+# Tests - run all tests (they should be fast anyway)
 echo "🧪 Running tests..."
 deno test
 if [ $? -ne 0 ]; then
