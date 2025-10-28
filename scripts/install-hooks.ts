@@ -10,10 +10,10 @@ await Deno.writeTextFile(".git/hooks/pre-commit", preCommitContent);
 
 // Make it executable (on Unix systems)
 if (Deno.build.os !== "windows") {
-  await Deno.chmod(".git/hooks/pre-commit", 0o755);
+    await Deno.chmod(".git/hooks/pre-commit", 0o755);
 }
 
 console.log("✅ Git hooks installed successfully!");
 console.log(
-  "The pre-commit hook will now run format, lint, and tests before each commit.",
+    "The pre-commit hook will now run format, lint, and tests before each commit.",
 );

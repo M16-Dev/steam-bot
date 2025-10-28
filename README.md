@@ -36,6 +36,8 @@ deno task dev
 ## Available Commands
 
 - `deno task dev` - Run in development mode with hot-reload
+- `deno task start` - Run in production mode
+- `deno task deploy` - Deploy slash commands to Discord
 - `deno task format` - Format code
 - `deno task format:check` - Check formatting without making changes
 - `deno task lint` - Run linter
@@ -43,10 +45,90 @@ deno task dev
 - `deno task check` - Run format check, linter, and tests (all at once)
 - `deno task install-hooks` - Install Git pre-commit hooks
 
+## Architecture
+
+### 📁 Project Structure
+
+```
+src/
+├── commands/          # Slash commands (auto-loaded)
+│   ├── ping.ts
+│   └── general/
+│       └── ping2.ts
+├── events/            # Discord events (auto-loaded)
+│   ├── ready.ts
+│   └── interactionCreate.ts
+├── components/        # Interactive components (auto-loaded)
+│   ├── buttons/
+│   ├── modals/
+│   └── select-menus/
+├── services/          # External APIs and business logic
+├── utils/             # Helper functions
+├── types/             # TypeScript type definitions
+├── loaders/           # Auto-loading system
+└── bot.ts             # Main bot class
+```
+
+### Adding New Features
+
+#### Create a Slash Command
+
+Create a file in `src/commands/`:
+
+```typescript
+import { SlashCommandBuilder } from "discord.js";
+import type { Command } from "../../types/command.ts";
+
+export default {
+    data: new SlashCommandBuilder()
+        .setName("mycommand")
+        .setDescription("My command description"),
+
+    async execute(interaction) {
+        await interaction.reply("Hello!");
+    },
+} satisfies Command;
+```
+
+Then deploy: `deno task deploy`
+
+#### Create an Event Handler
+
+Create a file in `src/events/`:
+
+```typescript
+import type { Event } from "../types/event.ts";
+
+export default {
+    name: "messageCreate",
+
+    async execute(message) {
+        // Handle the event
+    },
+} satisfies Event<"messageCreate">;
+```
+
+#### Create a Component (Button, Modal, etc.)
+
+Create a file in `src/components/buttons/`:
+
+```typescript
+import type { Component } from "../../types/component.ts";
+
+export default {
+    customId: "my-button",
+
+    async execute(interaction) {
+        await interaction.reply("Button clicked!");
+    },
+} satisfies Component;
+```
+
+All files are automatically loaded on bot startup!
+
 ## Pre-commit Hooks
 
-After installing hooks (`deno task install-hooks`), the following will run
-automatically before each commit:
+After installing hooks (`deno task install-hooks`), the following will run automatically before each commit:
 
 - ✅ Format check
 - ✅ Linter
