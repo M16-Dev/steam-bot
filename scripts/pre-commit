@@ -12,7 +12,7 @@ fi
 
 # Format check (only staged files)
 echo "📝 Checking formatting..."
-echo "$STAGED_FILES" | xargs deno fmt --check
+echo "$STAGED_FILES" | xargs deno task format:check
 if [ $? -ne 0 ]; then
   echo "❌ Formatting check failed. Run 'deno task format' to fix."
   exit 1
@@ -20,7 +20,7 @@ fi
 
 # Lint (only staged files)
 echo "🔎 Running linter..."
-echo "$STAGED_FILES" | xargs deno lint
+echo "$STAGED_FILES" | xargs deno task lint
 if [ $? -ne 0 ]; then
   echo "❌ Linting failed. Fix the issues before committing."
   exit 1
@@ -28,7 +28,7 @@ fi
 
 # Tests - run all tests (they should be fast anyway)
 echo "🧪 Running tests..."
-deno test
+deno task test
 if [ $? -ne 0 ]; then
   echo "❌ Tests failed. Fix the tests before committing."
   exit 1
