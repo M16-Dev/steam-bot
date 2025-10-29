@@ -25,3 +25,7 @@ export const steamProfileEmbed = (player: SteamPlayer) => {
         ],
     } satisfies APIEmbed;
 };
+
+export const steamConnectEmbed = () => {
+    return { title: "Connect to the server!" } satisfies APIEmbed;
+};
