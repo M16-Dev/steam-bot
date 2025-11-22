@@ -45,5 +45,9 @@ export async function getPlayerSummary(steamId: string): Promise<SteamPlayer | n
     }
 
     const data = await response.json();
-    return data.response.players[0] as SteamPlayer ?? null;
+    const player = data.response.players[0];
+    if (!player) return null;
+
+    player.avatar = player.avatarfull;
+    return player as SteamPlayer;
 }
