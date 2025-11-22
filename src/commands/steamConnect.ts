@@ -1,6 +1,7 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { Command } from "../types/command.ts";
-import { steamConnectEmbed } from "../utils/embeds.ts";
+import { steamConnectComponent } from "../utils/components.ts";
+
 import config from "../../config.json" with { type: "json" };
 
 export default {
@@ -10,33 +11,70 @@ export default {
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption((option) =>
             option
-                .setName("url")
-                .setDescription("The Steam connect URL for your server")
+                .setName("ip")
+                .setDescription("The IP of your server")
                 .setRequired(true)
+        )
+        .addIntegerOption((option) =>
+            option
+                .setName("port")
+                .setDescription("The port number of the server")
+                .setRequired(true)
+        )
+        .addStringOption((option) =>
+            option
+                .setName("password")
+                .setDescription("The password for the server (if any)")
+                .setRequired(false)
+        )
+        .addStringOption((option) =>
+            option
+                .setName("text")
+                .setDescription("Custom label next to the button. Psst... you can use markdown here!")
+                .setRequired(false)
         ),
     async execute(interaction) {
-        const url = interaction.options.getString("url", true);
-        const match = url.match(/^steam:\/\/connect\/(?<ip>(?:(?:(?!25?[6-9])[12]\d|[1-9])?\d\.?\b){4}):(?<port>[1-9]\d{0,4})\/?(?<password>.*)$/);
-        if (!match) {
-            return await interaction.reply({
-                content: "The provided URL is not a valid Steam connect URL.\n" +
-                    "Please ensure it follows the format: `steam://connect/IP:PORT/[optional_password]`",
+        const ip = interaction.options.getString("ip", true);
+        const port = interaction.options.getInteger("port", true);
+        const password = interaction.options.getString("password", false);
+        const text = interaction.options.getString("text", false) ?? undefined;
+        const res = await fetch(`${config.apiBaseUrl}/codes`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Deno.env.get("API_KEY")}`,
+            },
+            body: JSON.stringify({ guildId: interaction.guildId, ip, port, password }),
+        });
+        const data = await res.json();
+
+        if (res.status === 400) {
+            await interaction.reply({
+                content: `❌ Provided data is invalid.`,
                 flags: MessageFlags.Ephemeral,
             });
+            return;
+        }
+
+        if (res.status === 402) {
+            await interaction.reply({
+                content: `❌ ${data.error}`,
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+
+        if (!res.ok) {
+            await interaction.reply({
+                content: "❌ Failed to create connect code. Please try again later.",
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
         }
 
         await interaction.reply({
-            embeds: [steamConnectEmbed()],
-            components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder()
-                    .setLabel("Connect to Server")
-                    .setStyle(ButtonStyle.Link)
-                    .setURL(
-                        `${config.steamConnectUrl}?ip=${match.groups?.ip}&port=${match.groups?.port}${
-                            match.groups?.password ? `&password=${match.groups.password}` : ""
-                        }`,
-                    ),
-            )],
+            components: [steamConnectComponent(data.code, text)],
+            flags: MessageFlags.IsComponentsV2,
         });
     },
 } satisfies Command;

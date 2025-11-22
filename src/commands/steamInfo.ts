@@ -1,7 +1,7 @@
 import { Command } from "../types/command.ts";
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { getPlayerSummary, resolveVanityUrl } from "../services/steam.ts";
-import { steamProfileEmbed } from "../utils/embeds.ts";
+import { steamProfileComponent } from "../utils/components.ts";
 import SteamID from "steamid";
 
 export default {
@@ -58,6 +58,9 @@ export default {
             });
         }
 
-        await interaction.reply({ embeds: [steamProfileEmbed(profile)] });
+        await interaction.reply({
+            components: [steamProfileComponent(profile)],
+            flags: MessageFlags.IsComponentsV2,
+        });
     },
 } satisfies Command;
