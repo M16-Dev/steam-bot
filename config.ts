@@ -7,6 +7,7 @@ const rawConfig = {
     apiKey: Deno.env.get("API_KEY") as string | undefined,
     apiUrl: Deno.env.get("API_URL") as string | undefined,
     steamApiKey: Deno.env.get("STEAM_API_KEY") as string | undefined,
+    jwtSecret: Deno.env.get("JWT_SECRET") as string | undefined,
 };
 
 const ConfigSchema = z.object({
@@ -16,6 +17,7 @@ const ConfigSchema = z.object({
     apiKey: z.string(),
     apiUrl: z.string().url().regex(/^https?:\/\/.+/),
     steamApiKey: z.string(),
+    jwtSecret: z.string(),
 });
 
 const parseResult = ConfigSchema.safeParse(rawConfig);
