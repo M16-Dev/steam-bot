@@ -10,10 +10,12 @@ import {
     type APITextDisplayComponent,
     type APIThumbnailComponent,
     type APIUnfurledMediaItem,
+    BaseInteraction,
     ButtonStyle,
 } from "discord.js";
 import SteamID from "steamid";
 import { config } from "../../config.ts";
+import { getPlayerSummary } from "../services/steam.ts";
 
 export const steamProfileComponent = (player: SteamPlayer) => {
     const steamId = new SteamID(player.steamid);
@@ -123,5 +125,82 @@ export const createConnectionPublicComponent = () => {
                 ] satisfies APIButtonComponentWithCustomId[],
             } satisfies APIActionRowComponent<APIButtonComponentWithCustomId>,
         ] satisfies APIComponentInContainer[],
+    } satisfies APIContainerComponent;
+};
+
+const connectionComponent = (guildName: string | undefined, guildId: string, steamName: string | undefined, steamId: string) => {
+    return {
+        type: 9,
+        accessory: {
+            type: 2,
+            style: 4,
+            label: "Delete",
+            custom_id: `delete_connection_button;${guildId}`,
+        },
+        components: [
+            {
+                type: 10,
+                content: `>>> **Server: [${guildName ?? "ID: " + guildId}](https://discord.com/channels/${guildId})**
+**Steam: [${steamName ?? "ID: " + steamId}](https://steamcommunity.com/profiles/${steamId})**`,
+            },
+        ],
+    };
+};
+
+type Connection = {
+    guildId: string;
+    steamId: string;
+};
+
+export const manageConnectionsComponent = async (interaction: BaseInteraction, connections: Connection[]) => {
+    return {
+        type: 17,
+        accent_color: null,
+        spoiler: false,
+        components: [
+            {
+                type: 10,
+                content: `## Connections for ${interaction.user}`,
+            },
+            { type: 14, spacing: 2 },
+            ...connections.length
+                ? await Promise.all(connections.map(async (connection) =>
+                    connectionComponent(
+                        (await interaction.client.guilds.fetch(connection.guildId))?.name,
+                        connection.guildId,
+                        (await getPlayerSummary(connection.steamId))?.personaname,
+                        connection.steamId,
+                    )
+                ))
+                : [
+                    {
+                        type: 10,
+                        content: "You have no connections.",
+                    },
+                ],
+            ...connections.length > 10
+                ? [
+                    { type: 14, divider: false },
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                type: 2,
+                                style: 2,
+                                label: "Previous Page",
+                                disabled: true,
+                                custom_id: "previous_page_manage_connections_button",
+                            },
+                            {
+                                type: 2,
+                                style: 2,
+                                label: "Next Page",
+                                custom_id: "next_page_manage_connections_button",
+                            },
+                        ],
+                    },
+                ]
+                : [],
+        ],
     } satisfies APIContainerComponent;
 };

@@ -36,17 +36,18 @@ export default {
                 }
             }
         } else if (interaction.isModalSubmit() || interaction.isMessageComponent()) {
-            const component = client.components.get(interaction.customId);
+            const customId = interaction.customId.split(";")[0];
+            const component = client.components.get(customId);
 
             if (!component) {
-                logger.warn(`Unknown component: ${interaction.customId}`);
+                logger.warn(`Unknown component: ${customId}`);
                 return;
             }
 
             try {
                 await component.execute(interaction);
             } catch (error) {
-                logger.error(`Error executing component ${interaction.customId}`, error);
+                logger.error(`Error executing component ${customId}`, error);
             }
         }
     },
