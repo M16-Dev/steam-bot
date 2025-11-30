@@ -1,4 +1,12 @@
-import { APIButtonComponent, APIButtonComponentWithCustomId, APIContainerComponent, APISectionComponent, ButtonInteraction, MessageFlags } from "discord.js";
+import {
+    APIButtonComponent,
+    APIButtonComponentWithCustomId,
+    APIContainerComponent,
+    APISectionComponent,
+    ButtonInteraction,
+    ButtonStyle,
+    MessageFlags,
+} from "discord.js";
 import { Component } from "../../types/component.ts";
 import { config } from "../../../config.ts";
 
@@ -31,10 +39,10 @@ export default {
             "custom_id" in comp.accessory &&
             comp.accessory.custom_id === interaction.customId
         ) as APISectionComponent | undefined;
-        console.log(container);
-        console.log(interaction.customId);
+
         if (section) {
             (section.accessory as APIButtonComponent).disabled = true;
+            (section.accessory as APIButtonComponent).style = ButtonStyle.Secondary;
             (section.accessory as APIButtonComponentWithCustomId).label = "Deleted";
         }
 
