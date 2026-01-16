@@ -204,3 +204,74 @@ export const manageConnectionsComponent = async (interaction: BaseInteraction, c
         ],
     } satisfies APIContainerComponent;
 };
+
+type GameServerData = {
+    code: string;
+    ip: string;
+    port: number;
+    password: string | null;
+};
+
+const gameServerComponent = (server: GameServerData) => {
+    return {
+        type: 9,
+        accessory: {
+            type: 2,
+            style: 4,
+            label: "Delete",
+            custom_id: `delete_game_server_button;${server.code}`,
+        },
+        components: [
+            {
+                type: 10,
+                content: `>>> **Server:** \`${server.ip}:${server.port}\`\n**Password:** ${
+                    server.password ? server.password : "No password set."
+                }\n-# Code: \`${server.code}\``,
+            },
+        ],
+    };
+};
+
+export const manageGameServersComponent = async (_interaction: BaseInteraction, servers: GameServerData[]) => {
+    return {
+        type: 17,
+        accent_color: null,
+        spoiler: false,
+        components: [
+            {
+                type: 10,
+                content: `## Game Servers registered for this guild:`,
+            },
+            { type: 14, spacing: 2 },
+            ...servers.length ? await Promise.all(servers.map((server) => gameServerComponent(server))) : [
+                {
+                    type: 10,
+                    content: "There are no game servers registered for this guild.",
+                },
+            ],
+            ...servers.length > 10
+                ? [
+                    { type: 14, divider: false },
+                    {
+                        type: 1,
+                        components: [
+                            {
+                                type: 2,
+                                style: 2,
+                                label: "Previous Page",
+                                disabled: true,
+                                custom_id: "previous_page_manage_game_servers_button",
+                            },
+                            {
+                                type: 2,
+                                style: 2,
+                                label: "Next Page",
+                                custom_id: "next_page_manage_game_servers_button",
+                            },
+                        ],
+                    },
+                ]
+                : [],
+        ],
+    } satisfies APIContainerComponent;
+};
