@@ -19,7 +19,7 @@ const configComponent = async (interaction: ChatInputCommandInteraction) => {
                 components: [
                     {
                         type: 6,
-                        placeholder: "Select a role",
+                        placeholder: "Select a role or leave blank",
                         custom_id: "config_verified_role",
                         min_values: 0,
                         max_values: 1,
