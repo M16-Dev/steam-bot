@@ -1,0 +1,62 @@
+import type { Command } from "../types/command.ts";
+import { type ChatInputCommandInteraction, MessageFlags, RoleSelectMenuInteraction, SlashCommandBuilder } from "discord.js";
+
+const configComponent = async (interaction: ChatInputCommandInteraction) => {
+    const verifiedRole = await db.getVerifiedRole(interaction.guildId as string);
+
+    return {
+        type: 17,
+        components: [
+            { type: 10, content: "# Config" },
+            { type: 14 },
+            {
+                type: 10,
+                content: "### Role for verified users",
+            },
+            {
+                type: 1,
+                components: [
+                    {
+                        type: 6,
+                        placeholder: "Select a role",
+                        custom_id: "config_verified_role",
+                        min_values: 0,
+                        max_values: 1,
+                        default_values: verifiedRole ? [{ id: verifiedRole, type: "role" }] : [],
+                    },
+                ],
+            },
+        ],
+    };
+};
+
+export default {
+    data: new SlashCommandBuilder()
+        .setName("config")
+        .setDescription("Configure bot settings"),
+    async execute(interaction: ChatInputCommandInteraction) {
+        const response = await interaction.reply({
+            components: [await configComponent(interaction)],
+            flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+            withResponse: true,
+        });
+
+        if (!response.resource?.message) {
+            await interaction.followUp({
+                content: "An error occurred while handling the configuration menu. Please try again later.",
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+
+        response.resource.message.createMessageComponentCollector({}).on("collect", async (componentInteraction) => {
+            switch (componentInteraction.customId) {
+                case "config_verified_role": {
+                    const selectedRoleId = (componentInteraction as RoleSelectMenuInteraction).values[0];
+                    break;
+                }
+            }
+            await componentInteraction.deferUpdate();
+        });
+    },
+} satisfies Command<ChatInputCommandInteraction>;
