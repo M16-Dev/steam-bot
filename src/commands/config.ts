@@ -1,5 +1,5 @@
 import type { Command } from "../types/command.ts";
-import { type ChatInputCommandInteraction, MessageFlags, RoleSelectMenuInteraction, SlashCommandBuilder } from "discord.js";
+import { type ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, RoleSelectMenuInteraction, SlashCommandBuilder } from "discord.js";
 import { db } from "../services/db.ts";
 
 const configComponent = async (interaction: ChatInputCommandInteraction) => {
@@ -34,7 +34,8 @@ const configComponent = async (interaction: ChatInputCommandInteraction) => {
 export default {
     data: new SlashCommandBuilder()
         .setName("config")
-        .setDescription("Configure bot settings"),
+        .setDescription("Configure bot settings")
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction: ChatInputCommandInteraction) {
         const response = await interaction.reply({
             components: [await configComponent(interaction)],
