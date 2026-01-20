@@ -12,6 +12,28 @@ const key = await crypto.subtle.importKey(
 );
 
 export const createConnectionHandler = async (interaction: ButtonInteraction | ChatInputCommandInteraction): Promise<void> => {
+    const response = await fetch(`${config.apiUrl}/connections/${interaction.user.id}`, {
+        headers: { "Authorization": `Bearer ${config.apiKey}` },
+    });
+
+    if (!response.ok) {
+        await interaction.reply({
+            content: `Failed to check existing connections. Please try again later.`,
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
+    const { connections } = await response.json();
+    if (connections.length >= config.connectionsLimit) {
+        await interaction.reply({
+            content:
+                `You have reached the maximum number of connections (${config.connectionsLimit}). Please manage your existing connections before creating a new one.`,
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
+    }
+
     const token = await create(
         { alg: "HS256", typ: "JWT" },
         {

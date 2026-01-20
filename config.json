@@ -1,0 +1,5 @@
+{
+    "rateLimitMax": 30,
+    "rateLimitWindow": 60000,
+    "connectionsLimit": 10
+}

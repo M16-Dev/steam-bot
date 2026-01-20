@@ -1,4 +1,5 @@
 import { z } from "zod";
+import json from "./config.json" with { type: "json" };
 
 const rawConfig = {
     token: Deno.env.get("TOKEN") as string | undefined,
@@ -8,10 +9,11 @@ const rawConfig = {
     apiUrl: Deno.env.get("API_URL") as string | undefined,
     steamApiKey: Deno.env.get("STEAM_API_KEY") as string | undefined,
     jwtSecret: Deno.env.get("JWT_SECRET") as string | undefined,
-    rateLimitMax: Deno.env.get("RATE_LIMIT_MAX") ?? "30",
-    rateLimitWindow: Deno.env.get("RATE_LIMIT_WINDOW") ?? "60000",
-    internalApiPort: Deno.env.get("INTERNAL_API_PORT") ?? "8081",
+    internalApiPort: Deno.env.get("INTERNAL_API_PORT") ?? 8081,
     internalApiKey: Deno.env.get("INTERNAL_API_KEY") as string | undefined,
+    rateLimitMax: json.rateLimitMax ?? 30,
+    rateLimitWindow: json.rateLimitWindow ?? 60000,
+    connectionsLimit: json.connectionsLimit ?? 10,
 };
 
 const ConfigSchema = z.object({
@@ -22,10 +24,11 @@ const ConfigSchema = z.object({
     apiUrl: z.string().url().regex(/^https?:\/\/.+/),
     steamApiKey: z.string(),
     jwtSecret: z.string(),
-    rateLimitMax: z.coerce.number().min(1),
-    rateLimitWindow: z.coerce.number().min(1000),
     internalApiPort: z.coerce.number().int().positive(),
     internalApiKey: z.string().min(1),
+    rateLimitMax: z.coerce.number().min(1),
+    rateLimitWindow: z.coerce.number().min(1000),
+    connectionsLimit: z.coerce.number().int().positive(),
 });
 
 const parseResult = ConfigSchema.safeParse(rawConfig);
