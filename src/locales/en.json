@@ -39,7 +39,8 @@
             "create": {
                 "label": "Create New Token",
                 "disabled": "Max Tokens Reached",
-                "error": "Failed to create token. Please try again later."
+                "error": "Failed to create token. Please try again later.",
+                "success": "# Token created successfully!\nHere is your token:\n```\n{{token}}\n```Keep it safe. You will not be able to see it again."
             }
         }
     },
@@ -71,7 +72,7 @@
             "header": "Link your accounts!",
             "info": "Link your Discord and Steam account.\nClick the button below to get a unique link:",
             "buttonLabel": "Link Accounts",
-            "personalInfo": "- You will be redirected to official Steam login page (steamcommunity.com)\n- We only get your public Steam ID from Steam\n- Link expires in 10 minutes. Do not share this link!"
+            "personalInfo": "- You will be redirected to official Steam login page (steamcommunity.com)\n- We only get your public Steam ID from Steam\n- Link expires in {{expiration}} minutes. Do not share this link!"
         },
         "manage": {
             "header": "Connections for {{user}}",

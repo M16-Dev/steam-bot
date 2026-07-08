@@ -4,7 +4,7 @@ import config from "../../config.ts";
 
 const client = hc<AppType>(config.apiUrl, {
     headers: {
-        "Authorization": `Bearer ${config.apiKey}`,
+        "Authorization": `Bot ${config.apiKey}`,
     },
 });
 

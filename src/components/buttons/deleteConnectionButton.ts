@@ -18,8 +18,8 @@ export default {
     async execute(interaction: ButtonInteraction): Promise<void> {
         const [, guildId] = interaction.customId.split(";");
 
-        const response = await client.api.v1.connections.$delete({
-            json: { discordId: interaction.user.id, guildId },
+        const response = await client.v1.guilds[":guildId"].connections.discord[":discordId"].$delete({
+            param: { guildId: interaction.guildId!, discordId: interaction.user.id },
         });
 
         if (!response.ok) {

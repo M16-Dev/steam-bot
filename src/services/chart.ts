@@ -7,12 +7,13 @@ const qc = QuickChart as any;
 const getYMax = (historyMax: number, serverMax: number): number => {
     if (historyMax) {
         const rounded = 1 << (32 - Math.clz32(historyMax));
-        if (serverMax)
+        if (serverMax) {
             return Math.min(rounded, serverMax);
+        }
         return rounded;
     }
-    return serverMax
-}
+    return serverMax;
+};
 
 export async function generateChartBuffer(history: ServerHistoryEntry[], serverMaxPlayers: number): Promise<Uint8Array | null> {
     const chartData = history.map((h) => ({

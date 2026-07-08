@@ -1,6 +1,5 @@
 import { BaseGuildTextChannel, ChatInputCommandInteraction, MessageFlags } from "discord.js";
 import { manageGameServersComponent, steamConnectComponent } from "../ui/steamConnect.ts";
-import { config } from "../../config.ts";
 import client from "../services/backendClient.ts";
 import { t } from "../utils/i18n.ts";
 
@@ -9,8 +8,9 @@ export const createSteamConnectHandler = async (interaction: ChatInputCommandInt
     const port = interaction.options.getInteger("port", true);
     const password = interaction.options.getString("password", false);
     const text = interaction.options.getString("text", false) ?? undefined;
-    const res = await client.api.v1.codes.$post({
-        json: { guildId: interaction.guildId!, ip, port, password: password ?? null },
+    const res = await client.v1.guilds[":guildId"].codes.$post({
+        param: { guildId: interaction.guildId! },
+        json: { ip, port, password: password },
     });
     const data = await res.json();
 
@@ -51,10 +51,9 @@ export const createSteamConnectHandler = async (interaction: ChatInputCommandInt
 };
 
 export const manageSteamConnectHandler = async (interaction: ChatInputCommandInteraction): Promise<void> => {
-    const response = await client.api.v1.codes.guild[":guildId"].$get({
+    const response = await client.v1.guilds[":guildId"].codes.$get({
         param: { guildId: interaction.guildId! },
-    }, {
-        headers: { "Authorization": `Bearer ${config.apiKey}` },
+        query: {},
     });
 
     if (!response.ok) {
@@ -65,7 +64,7 @@ export const manageSteamConnectHandler = async (interaction: ChatInputCommandInt
         return;
     }
 
-    const codes: { code: string; ip: string; port: number; password: string | null }[] = (await response.json()).data;
+    const { data: codes } = await response.json();
 
     await interaction.reply({
         components: [await manageGameServersComponent(interaction, codes)],

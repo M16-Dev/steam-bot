@@ -16,7 +16,7 @@ export default {
     async execute(interaction: ButtonInteraction): Promise<void> {
         const [, code] = interaction.customId.split(";");
 
-        const response = await client.api.v1.codes[":code"].$delete({ param: { code } });
+        const response = await client.v1.guilds[":guildId"].codes[":code"].$delete({ param: { guildId: interaction.guildId!, code } });
 
         if (!response.ok) {
             await interaction.reply({

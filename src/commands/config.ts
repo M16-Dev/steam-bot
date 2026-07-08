@@ -10,13 +10,12 @@ import {
 import { db } from "../services/db.ts";
 import RateLimiter from "../utils/rateLimiter.ts";
 import Client from "../services/backendClient.ts";
-import { config } from "../../config.ts";
 import { getLocalizations, t } from "../utils/i18n.ts";
 import { configComponent, tokensComponent } from "../ui/config.ts";
 
 const fetchTokens = async (guildId: string) => {
-    const res = await Client.api.v1.tokens[":guildId"].$get({ param: { guildId } });
-    return await res.json() as string[];
+    const res = await Client.v1.guilds[":guildId"].tokens.$get({ param: { guildId: guildId as string }, query: {} });
+    return (await res.json()).data;
 };
 
 const handleManageTokensInterface = async (interaction: MessageComponentInteraction) => {
@@ -39,10 +38,10 @@ const handleManageTokensInterface = async (interaction: MessageComponentInteract
     response.resource.message.createMessageComponentCollector({
         filter: async (i) => !(await RateLimiter.handleRateLimit(i)),
     }).on("collect", async (componentInteraction: MessageComponentInteraction) => {
-        const [action, token] = componentInteraction.customId.split(";");
+        const [action, tokenId] = componentInteraction.customId.split(";");
         switch (action) {
             case "$delete_token": {
-                const res = await Client.api.v1.tokens[":token"].$delete({ param: { token } });
+                const res = await Client.v1.guilds[":guildId"].tokens[":id"].$delete({ param: { guildId: interaction.guildId!, id: tokenId } });
                 if (!res.ok) {
                     await componentInteraction.reply({
                         content: t("config.tokensPanel.delete.error", interaction.locale),
@@ -55,7 +54,10 @@ const handleManageTokensInterface = async (interaction: MessageComponentInteract
                 break;
             }
             case "$create_token": {
-                const res = await Client.api.v1.tokens.$post({ json: { guildId: interaction.guildId as string } });
+                const res = await Client.v1.guilds[":guildId"].tokens.$post({
+                    json: { discordUserId: interaction.user.id },
+                    param: { guildId: interaction.guildId as string },
+                });
                 if (!res.ok) {
                     await componentInteraction.reply({
                         content: t("config.tokensPanel.create.error", interaction.locale),
@@ -63,8 +65,13 @@ const handleManageTokensInterface = async (interaction: MessageComponentInteract
                     });
                     return;
                 }
+                const token = (await res.json()).token;
                 const updatedTokens = await fetchTokens(interaction.guildId as string);
                 await componentInteraction.update({ components: [tokensComponent(updatedTokens, interaction.locale)] });
+                await componentInteraction.followUp({
+                    content: t("config.tokensPanel.create.success", interaction.locale, { token }),
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
         }

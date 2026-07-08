@@ -39,7 +39,8 @@
             "create": {
                 "label": "Utwórz Nowy Token",
                 "disabled": "Osiągnięto Maksymalną Liczbę Tokenów",
-                "error": "Nie udało się utworzyć tokena. Spróbuj ponownie później."
+                "error": "Nie udało się utworzyć tokena. Spróbuj ponownie później.",
+                "success": "# Token utworzony pomyślnie!\nOto Twój token:\n```\n{{token}}\n```\nZachowaj go w bezpiecznym miejscu. Nie będziesz mógł go zobaczyć ponownie."
             }
         }
     },
@@ -71,7 +72,7 @@
             "header": "Połącz swoje konta!",
             "info": "Połącz swoje konto Discord i Steam.\nKliknij przycisk poniżej, aby uzyskać unikalny link:",
             "buttonLabel": "Połącz Konta",
-            "personalInfo": "- Zostaniesz przekierowany na oficjalną stronę logowania Steam (steamcommunity.com)\n- Pobieramy tylko Twoje publiczne ID konta od Steam\n- Link wygasa w ciągu 10 minut. Nie udostępniaj tego linku!"
+            "personalInfo": "- Zostaniesz przekierowany na oficjalną stronę logowania Steam (steamcommunity.com)\n- Pobieramy tylko Twoje publiczne ID konta od Steam\n- Link wygasa w ciągu {{expiration}} minut. Nie udostępniaj tego linku!"
         },
         "manage": {
             "header": "Połączenia dla {{user}}",

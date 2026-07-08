@@ -14,7 +14,7 @@ import client from "../services/backendClient.ts";
 import { getPlayerSummary } from "../services/steam.ts";
 import { t } from "../utils/i18n.ts";
 
-export const createConnectionPersonalComponent = (token: string, locale: string) => {
+export const createConnectionPersonalComponent = (token: string, locale: string, expiration: number) => {
     return {
         type: 17,
         components: [
@@ -29,13 +29,13 @@ export const createConnectionPersonalComponent = (token: string, locale: string)
                 accessory: {
                     type: 2,
                     style: 5,
-                    url: `${client.connections.create.$url({ query: { token: encodeURIComponent(token) } })}`,
+                    url: `${client.v1.auth.steam.link.$url({ query: { token: encodeURIComponent(token) } })}`,
                     label: t("connections.create.buttonLabel", locale),
                 } satisfies APIButtonComponentWithURL,
             } satisfies APISectionComponent,
             {
                 type: 10,
-                content: `>>> ${t("connections.create.personalInfo", locale)}`,
+                content: `>>> ${t("connections.create.personalInfo", locale, { expiration })}`,
             } satisfies APITextDisplayComponent,
         ] satisfies APIComponentInContainer[],
     } satisfies APIContainerComponent;

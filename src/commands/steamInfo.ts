@@ -45,11 +45,8 @@ export default {
         let linkedDiscordId: string | null = null;
 
         if (discordUser) {
-            const res = await client.api.v1.connections.$get({
-                query: {
-                    discordId: discordUser.id,
-                    guildId: interaction.guildId!,
-                },
+            const res = await client.v1.guilds[":guildId"].connections.discord[":discordId"].$get({
+                param: { guildId: interaction.guildId!, discordId: discordUser.id },
             });
 
             if (res.ok) {
@@ -73,11 +70,8 @@ export default {
         }
 
         if (!linkedDiscordId) {
-            const res = await client.api.v1.connections.$get({
-                query: {
-                    steamId: targetSteamId64,
-                    guildId: interaction.guildId!,
-                },
+            const res = await client.v1.guilds[":guildId"].connections.steam[":steamId"].$get({
+                param: { guildId: interaction.guildId!, steamId: targetSteamId64 },
             });
 
             if (res.ok) {

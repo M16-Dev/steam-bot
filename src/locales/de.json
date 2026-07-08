@@ -39,7 +39,8 @@
             "create": {
                 "label": "Neuen Token erstellen",
                 "disabled": "Maximale Anzahl an Tokens erreicht",
-                "error": "Token konnte nicht erstellt werden. Bitte versuchen Sie es später erneut."
+                "error": "Token konnte nicht erstellt werden. Bitte versuchen Sie es später erneut.",
+                "success": "# Token erfolgreich erstellt!\nHier ist dein Token:\n```\n{{token}}\n```\nBehalte ihn an einem sicheren Ort. Du wirst ihn nicht wiedersehen können."
             }
         }
     },
@@ -71,7 +72,7 @@
             "header": "Verknüpfen Sie Ihre Konten!",
             "info": "Verknüpfen Sie Ihr Discord- und Steam-Konto.\nKlicken Sie auf den Button unten, um einen einzigartigen Link zu erhalten:",
             "buttonLabel": "Konten verknüpfen",
-            "personalInfo": "- Sie werden zur offiziellen Steam-Login-Seite (steamcommunity.com) weitergeleitet\n- Wir erhalten nur Ihre öffentliche Steam-ID von Steam\n- Der Link läuft in 10 Minuten ab. Teilen Sie diesen Link nicht!"
+            "personalInfo": "- Sie werden zur offiziellen Steam-Login-Seite (steamcommunity.com) weitergeleitet\n- Wir erhalten nur Ihre öffentliche Steam-ID von Steam\n- Der Link läuft in {{expiration}} Minuten ab. Teilen Sie diesen Link nicht!"
         },
         "manage": {
             "header": "Verbindungen für {{user}}",

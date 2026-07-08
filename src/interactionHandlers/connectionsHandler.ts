@@ -13,9 +13,12 @@ const key = await crypto.subtle.importKey(
     ["sign"],
 );
 
+const tokenExpirationTime = 5;
+
 export const createConnectionHandler = async (interaction: ButtonInteraction | ChatInputCommandInteraction): Promise<void> => {
-    const response = await client.api.v1.connections.$get({
-        query: { discordId: interaction.user.id },
+    const response = await client.v1.users[":discordUserId"].connections.$get({
+        param: { discordUserId: interaction.user.id },
+        query: {},
     });
 
     if (!response.ok) {
@@ -26,7 +29,7 @@ export const createConnectionHandler = async (interaction: ButtonInteraction | C
         return;
     }
 
-    const { connections } = await response.json() as { connections: ConnectionWithGuild[] };
+    const { data: connections } = await response.json();
     if (connections.length >= config.connectionsLimit) {
         await interaction.reply({
             content: t("connections.limitReached", interaction.locale, { limit: config.connectionsLimit }),
@@ -40,29 +43,22 @@ export const createConnectionHandler = async (interaction: ButtonInteraction | C
         {
             discordId: interaction.user.id,
             guildId: interaction.guildId,
-            exp: getNumericDate(10 * 60),
+            exp: getNumericDate(tokenExpirationTime * 60),
+            jti: crypto.randomUUID(),
         },
         key,
     );
 
     await interaction.reply({
-        components: [createConnectionPersonalComponent(token, interaction.locale)],
+        components: [createConnectionPersonalComponent(token, interaction.locale, tokenExpirationTime)],
         flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
 };
 
-interface Connection {
-    discord_id: string;
-    steam_id: string;
-    created_at: string;
-}
-interface ConnectionWithGuild extends Connection {
-    guild_id: string;
-}
-
 export const manageConnectionsHandler = async (interaction: ButtonInteraction | ChatInputCommandInteraction): Promise<void> => {
-    const response = await client.api.v1.connections.$get({
-        query: { discordId: interaction.user.id },
+    const response = await client.v1.users[":discordUserId"].connections.$get({
+        param: { discordUserId: interaction.user.id },
+        query: {},
     });
 
     if (!response.ok) {
@@ -72,10 +68,10 @@ export const manageConnectionsHandler = async (interaction: ButtonInteraction | 
         });
         return;
     }
-    const { connections } = await response.json() as { connections: ConnectionWithGuild[] };
+    const { data: connections } = await response.json();
 
     await interaction.reply({
-        components: [await manageConnectionsComponent(interaction, connections.map((con) => ({ guildId: con.guild_id, steamId: con.steam_id })))],
+        components: [await manageConnectionsComponent(interaction, connections)],
         flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
     });
 };

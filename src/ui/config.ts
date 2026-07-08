@@ -45,7 +45,7 @@ export const configComponent = (verifiedRole: string | undefined, locale: string
     };
 };
 
-export const tokensComponent = (tokens: string[], locale: string) => {
+export const tokensComponent = (tokens: { id: string; last4: string; createdAt: string; createdBy: string }[], locale: string) => {
     return {
         type: 17,
         components: [
@@ -56,14 +56,16 @@ export const tokensComponent = (tokens: string[], locale: string) => {
                 components: [
                     {
                         type: 10,
-                        content: `\`${token}\``,
+                        content: `\`${"*".repeat(32)}${token.last4}\`\n-# <@${token.createdBy}> | <t:${
+                            Math.floor(new Date(token.createdAt).getTime() / 1000)
+                        }:D>`,
                     },
                 ],
                 accessory: {
                     type: 2,
                     style: 4,
                     label: t("common.delete", locale),
-                    custom_id: `$delete_token;${token}`,
+                    custom_id: `$delete_token;${token.id}`,
                 },
             }))),
             {
