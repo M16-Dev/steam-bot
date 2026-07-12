@@ -24,7 +24,8 @@
         "header": "Konfiguracja",
         "verifiedRole": {
             "header": "Rola dla zweryfikowanych użytkowników",
-            "placeholder": "Wybierz rolę lub pozostaw puste"
+            "placeholder": "Wybierz rolę lub pozostaw puste",
+            "roleHierarchyError": "Błąd hierarchii ról. Wybrana rola musi znajdować się niżej od najwyższej roli bota."
         },
         "tokens": {
             "header": "Tokeny"

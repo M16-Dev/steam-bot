@@ -9,7 +9,6 @@ import {
     MessageFlags,
 } from "discord.js";
 import { Component } from "../../types/component.ts";
-import { db } from "../../services/db.ts";
 import client from "../../services/backendClient.ts";
 import { t } from "../../utils/i18n.ts";
 
@@ -30,7 +29,15 @@ export default {
             return;
         }
 
-        const verifiedRoleId = await db.getVerifiedRole(guildId);
+        const res = await client.v1.guilds[":guildId"].settings.$get({ param: { guildId } });
+        if (!res.ok) {
+            await interaction.reply({
+                content: t("common.error", interaction.locale),
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+        const verifiedRoleId = (await res.json()).verifiedRoleId;
         if (verifiedRoleId && interaction.member?.roles instanceof GuildMemberRoleManager) {
             await interaction.member.roles.remove(verifiedRoleId).catch(() => {});
         }

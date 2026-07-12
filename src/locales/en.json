@@ -24,7 +24,8 @@
         "header": "Config",
         "verifiedRole": {
             "header": "Role for verified users",
-            "placeholder": "Select a role or leave blank"
+            "placeholder": "Select a role or leave blank",
+            "roleHierarchyError": "Role hierarchy error. Selected role must be lower than bot's highest role."
         },
         "tokens": {
             "header": "Tokens"

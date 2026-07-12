@@ -1,7 +1,7 @@
 import { Bot } from "../bot.ts";
 import { config } from "../../config.ts";
-import { db } from "./db.ts";
 import { logger } from "../utils/logger.ts";
+import client from "./backendClient.ts";
 
 export function startApiServer(bot: Bot) {
     Deno.serve({ port: config.internalApiPort, onListen: () => {} }, async (req) => {
@@ -23,7 +23,12 @@ export function startApiServer(bot: Bot) {
 
                 logger.info(`Internal API: Processing verification for User ${discordId} in Guild ${guildId}`);
 
-                const roleId = await db.getVerifiedRole(guildId);
+                const res = await client.v1.guilds[":guildId"].settings.$get({ param: { guildId } });
+                if (!res.ok) {
+                    return new Response(JSON.stringify({ error: "Failed to fetch guild settings" }), { status: res.status });
+                }
+
+                const roleId = (await res.json())?.verifiedRoleId;
                 if (!roleId) {
                     return new Response(JSON.stringify({ message: "No verified role configured" }), { status: 200 });
                 }

@@ -7,7 +7,6 @@ import {
     RoleSelectMenuInteraction,
     SlashCommandBuilder,
 } from "discord.js";
-import { db } from "../services/db.ts";
 import RateLimiter from "../utils/rateLimiter.ts";
 import Client from "../services/backendClient.ts";
 import { getLocalizations, t } from "../utils/i18n.ts";
@@ -86,7 +85,16 @@ export default {
         .setDescriptionLocalizations(getLocalizations("commands.config.description"))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction: ChatInputCommandInteraction) {
-        const verifiedRole = await db.getVerifiedRole(interaction.guildId as string);
+        const res = await Client.v1.guilds[":guildId"].settings.$get({ param: { guildId: interaction.guildId as string } });
+        if (!res.ok) {
+            await interaction.reply({
+                content: t("common.error", interaction.locale),
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+        const verifiedRole = (await res.json()).verifiedRoleId || undefined;
+
         const response = await interaction.reply({
             components: [configComponent(verifiedRole, interaction.locale)],
             flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
@@ -106,8 +114,33 @@ export default {
         }).on("collect", async (componentInteraction: MessageComponentInteraction) => {
             switch (componentInteraction.customId) {
                 case "$config_verified_role": {
-                    const selectedRoleId = (componentInteraction as RoleSelectMenuInteraction).values[0];
-                    db.setVerifiedRole(interaction.guildId as string, selectedRoleId);
+                    const roleSelectInteraction = componentInteraction as RoleSelectMenuInteraction;
+                    const selectedRoleId = roleSelectInteraction.values[0];
+
+                    if (selectedRoleId) {
+                        const guildRole = roleSelectInteraction.guild?.roles.cache.get(selectedRoleId);
+                        const botMember = await roleSelectInteraction.guild?.members.fetchMe();
+
+                        if (guildRole && botMember && guildRole.comparePositionTo(botMember.roles.highest) >= 0) {
+                            await roleSelectInteraction.reply({
+                                content: t("config.verifiedRole.roleHierarchyError", interaction.locale),
+                                flags: MessageFlags.Ephemeral,
+                            });
+                            return;
+                        }
+                    }
+
+                    const res = await Client.v1.guilds[":guildId"].settings.$patch({
+                        json: { verifiedRoleId: selectedRoleId || null },
+                        param: { guildId: interaction.guildId as string },
+                    });
+                    if (!res.ok) {
+                        await componentInteraction.reply({
+                            content: t("common.error", interaction.locale),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
                     await componentInteraction.deferUpdate();
                     break;
                 }

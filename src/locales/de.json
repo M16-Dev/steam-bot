@@ -24,7 +24,8 @@
         "header": "Konfiguration",
         "verifiedRole": {
             "header": "Rolle für verifizierte Benutzer",
-            "placeholder": "Wählen Sie eine Rolle oder lassen Sie das Feld leer"
+            "placeholder": "Wählen Sie eine Rolle oder lassen Sie das Feld leer",
+            "roleHierarchyError": "Fehler bei der Rollenhierarchie. Ausgewählte Rolle muss niedriger als die höchste Rolle des Bots sein."
         },
         "tokens": {
             "header": "Tokens"
